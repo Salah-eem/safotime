@@ -8,9 +8,8 @@ const app = express();
 
 // Configuration CORS pour production
 const corsOptions = {
-  origin: process.env.NODE_ENV === 'production' 
-    ? [process.env.CORS_ORIGIN, 'https://safotime.vercel.app'] 
-    : ['http://localhost:3000', 'http://127.0.0.1:3000'],
+  origin: [process.env.CORS_ORIGIN, 'https://safotime.vercel.app', 
+    'http://localhost:3000', 'http://127.0.0.1:3000'],
   credentials: true,
   optionsSuccessStatus: 200
 };
