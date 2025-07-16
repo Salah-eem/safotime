@@ -177,9 +177,9 @@ router.put('/:id', upload.single('image'), async (req, res) => {
     if (req.file) {
       // En production avec Cloudinary, utiliser l'URL complète
       // En développement, utiliser juste le filename
-      updateData.image = process.env.NODE_ENV === 'production' || process.env.USE_CLOUDINARY === 'true' 
-        ? req.file.path 
-        : req.file.filename;
+      updateData.image = //process.env.NODE_ENV === 'production' || process.env.USE_CLOUDINARY === 'true' 
+         req.file.path ;
+        //: req.file.filename;
     }
 
     const product = await Product.findByIdAndUpdate(
