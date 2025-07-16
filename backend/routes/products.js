@@ -5,32 +5,56 @@ const Product = require('../models/Product');
 
 const router = express.Router();
 
-// Configuration de multer pour l'upload d'images
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/');
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-  }
-});
+// Utiliser Cloudinary en production, stockage local en développement
+let upload;
 
-const fileFilter = (req, file, cb) => {
-  if (file.mimetype.startsWith('image/')) {
-    cb(null, true);
-  } else {
-    cb(new Error('Seules les images sont autorisées!'), false);
-  }
-};
+if (process.env.NODE_ENV === 'production' || process.env.USE_CLOUDINARY === 'true') {
+  // Configuration Cloudinary pour la production
+  const { storage } = require('../config/cloudinary');
+  
+  const fileFilter = (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Seules les images sont autorisées!'), false);
+    }
+  };
 
-const upload = multer({ 
-  storage: storage,
-  fileFilter: fileFilter,
-  limits: {
-    fileSize: 5 * 1024 * 1024 // 5MB
-  }
-});
+  upload = multer({ 
+    storage: storage,
+    fileFilter: fileFilter,
+    limits: {
+      fileSize: 5 * 1024 * 1024 // 5MB
+    }
+  });
+} else {
+  // Configuration locale pour le développement
+  const localStorage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, 'uploads/');
+    },
+    filename: function (req, file, cb) {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+    }
+  });
+
+  const fileFilter = (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Seules les images sont autorisées!'), false);
+    }
+  };
+
+  upload = multer({ 
+    storage: localStorage,
+    fileFilter: fileFilter,
+    limits: {
+      fileSize: 5 * 1024 * 1024 // 5MB
+    }
+  });
+}
 
 // GET /api/products - Récupérer tous les produits
 router.get('/', async (req, res) => {
@@ -123,7 +147,11 @@ router.post('/', upload.single('image'), async (req, res) => {
     };
 
     if (req.file) {
-      productData.image = req.file.filename;
+      // En production avec Cloudinary, utiliser l'URL complète
+      // En développement, utiliser juste le filename
+      productData.image = process.env.NODE_ENV === 'production' || process.env.USE_CLOUDINARY === 'true' 
+        ? req.file.path 
+        : req.file.filename;
     }
 
     const product = new Product(productData);
@@ -147,7 +175,11 @@ router.put('/:id', upload.single('image'), async (req, res) => {
     };
 
     if (req.file) {
-      updateData.image = req.file.filename;
+      // En production avec Cloudinary, utiliser l'URL complète
+      // En développement, utiliser juste le filename
+      updateData.image = process.env.NODE_ENV === 'production' || process.env.USE_CLOUDINARY === 'true' 
+        ? req.file.path 
+        : req.file.filename;
     }
 
     const product = await Product.findByIdAndUpdate(

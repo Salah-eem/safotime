@@ -85,6 +85,13 @@ export const productService = {
   // Construire l'URL de l'image
   getImageUrl(filename) {
     if (!filename) return '/placeholder-image.jpg'
+    
+    // Si l'image commence par 'http', c'est déjà une URL complète (Cloudinary)
+    if (filename.startsWith('http')) {
+      return filename
+    }
+    
+    // Sinon, c'est un fichier local (développement)
     const baseUrl = process.env.VUE_APP_API_URL || 'http://localhost:5000'
     return `${baseUrl}/uploads/${filename}`
   }
