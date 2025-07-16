@@ -76,6 +76,12 @@ export const productService = {
     return response.data
   },
 
+  // Mettre à jour l'ordre des produits
+  async updateProductsOrder(orderedIds) {
+    const response = await api.put('/products/order', { orderedIds })
+    return response.data
+  },
+
   // Construire l'URL de l'image
   getImageUrl(filename) {
     if (!filename) return '/placeholder-image.jpg'

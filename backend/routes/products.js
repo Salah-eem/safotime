@@ -46,8 +46,52 @@ router.get('/', async (req, res) => {
       filter.name = { $regex: search, $options: 'i' };
     }
     
-    const products = await Product.find(filter).sort({ createdAt: -1 });
+    const products = await Product.find(filter).sort({ displayOrder: 1, createdAt: -1 });
     res.json(products);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// GET /api/products/stats/categories - Statistiques par catégorie
+router.get('/stats/categories', async (req, res) => {
+  try {
+    const stats = await Product.aggregate([
+      {
+        $group: {
+          _id: '$category',
+          count: { $sum: 1 },
+          averagePrice: { $avg: '$price' }
+        }
+      }
+    ]);
+    res.json(stats);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// PUT /api/products/order - Mettre à jour l'ordre des produits
+router.put('/order', async (req, res) => {
+  try {
+    const { orderedIds } = req.body;
+    
+    if (!Array.isArray(orderedIds)) {
+      return res.status(400).json({ message: 'orderedIds doit être un tableau' });
+    }
+
+    // Mettre à jour l'ordre de chaque produit
+    const updatePromises = orderedIds.map((productId, index) => {
+      return Product.findByIdAndUpdate(
+        productId,
+        { displayOrder: index },
+        { new: true }
+      );
+    });
+
+    await Promise.all(updatePromises);
+    
+    res.json({ message: 'Ordre des produits mis à jour avec succès' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -130,24 +174,6 @@ router.delete('/:id', async (req, res) => {
       return res.status(404).json({ message: 'Produit non trouvé' });
     }
     res.json({ message: 'Produit supprimé avec succès' });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
-
-// GET /api/products/stats/categories - Statistiques par catégorie
-router.get('/stats/categories', async (req, res) => {
-  try {
-    const stats = await Product.aggregate([
-      {
-        $group: {
-          _id: '$category',
-          count: { $sum: 1 },
-          averagePrice: { $avg: '$price' }
-        }
-      }
-    ]);
-    res.json(stats);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
