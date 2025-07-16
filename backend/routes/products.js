@@ -10,7 +10,7 @@ let upload;
 
 // if (process.env.NODE_ENV === 'production' || process.env.USE_CLOUDINARY === 'true') {
   // Configuration Cloudinary pour la production
- /* const { storage } = require('../config/cloudinary');
+  const { storage } = require('../config/cloudinary');
   
   const fileFilter = (req, file, cb) => {
     if (file.mimetype.startsWith('image/')) {
@@ -29,7 +29,7 @@ let upload;
   });
 // } else {
   // Configuration locale pour le développement
-  const localStorage = multer.diskStorage({
+  /*const localStorage = multer.diskStorage({
     destination: function (req, file, cb) {
       cb(null, 'uploads/');
     },
