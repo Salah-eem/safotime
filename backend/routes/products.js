@@ -8,9 +8,9 @@ const router = express.Router();
 // Utiliser Cloudinary en production, stockage local en développement
 let upload;
 
-if (process.env.NODE_ENV === 'production' || process.env.USE_CLOUDINARY === 'true') {
+// if (process.env.NODE_ENV === 'production' || process.env.USE_CLOUDINARY === 'true') {
   // Configuration Cloudinary pour la production
-  const { storage } = require('../config/cloudinary');
+ /* const { storage } = require('../config/cloudinary');
   
   const fileFilter = (req, file, cb) => {
     if (file.mimetype.startsWith('image/')) {
@@ -27,7 +27,7 @@ if (process.env.NODE_ENV === 'production' || process.env.USE_CLOUDINARY === 'tru
       fileSize: 5 * 1024 * 1024 // 5MB
     }
   });
-} else {
+// } else {
   // Configuration locale pour le développement
   const localStorage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -55,7 +55,7 @@ if (process.env.NODE_ENV === 'production' || process.env.USE_CLOUDINARY === 'tru
     }
   });
 }
-
+*/
 // GET /api/products - Récupérer tous les produits
 router.get('/', async (req, res) => {
   try {
